@@ -102,24 +102,6 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 
 **Note**: After configuring, run `bun run start auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
 
-### Docker
-
-```bash
-docker build -t inoreader-mcp .
-
-# For Docker, use environment variable for token (no keychain access)
-docker run -e INOREADER_ACCESS_TOKEN=xxx inoreader-mcp
-```
-
-## Token Storage
-
-| Method | Storage Location | Auto-refresh |
-|--------|------------------|--------------|
-| Keychain (default) | macOS Keychain / Linux libsecret | Yes |
-| Environment variable | `INOREADER_ACCESS_TOKEN` | No |
-
-Priority: Environment variable > Keychain
-
 ## Available Tools
 
 | Tool | Description |
@@ -181,13 +163,6 @@ sudo apt install libsecret-tools
 ### "Token expired" errors
 
 Run `bun run start auth login` to re-authenticate.
-
-### Using without keychain
-
-Set the access token directly (no auto-refresh):
-```bash
-export INOREADER_ACCESS_TOKEN="your-token"
-```
 
 ## Disclaimer
 

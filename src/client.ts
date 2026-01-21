@@ -265,6 +265,31 @@ export class InoreaderClient {
       i: itemId,
     });
   }
+
+  async editSubscription(
+    subscriptionId: string,
+    options: {
+      title?: string;
+      addToFolder?: string;
+      removeFromFolder?: string;
+    },
+  ): Promise<void> {
+    const body = new URLSearchParams();
+    body.append("ac", "edit");
+    body.append("s", subscriptionId);
+
+    if (options.title) {
+      body.append("t", options.title);
+    }
+    if (options.addToFolder) {
+      body.append("a", `user/-/label/${options.addToFolder}`);
+    }
+    if (options.removeFromFolder) {
+      body.append("r", `user/-/label/${options.removeFromFolder}`);
+    }
+
+    await this.request<string>("POST", "/subscription/edit", undefined, body);
+  }
 }
 
 export async function createClient(): Promise<InoreaderClient> {

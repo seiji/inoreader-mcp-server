@@ -507,6 +507,105 @@ server.tool(
   },
 );
 
+// Move subscription to folder
+server.tool(
+  "move_subscription_to_folder",
+  "Add a subscription to a folder",
+  {
+    subscription_id: z
+      .string()
+      .describe("The subscription ID (e.g., feed/https://example.com/rss)"),
+    folder_name: z
+      .string()
+      .describe("The folder name to add the subscription to"),
+  },
+  async ({ subscription_id, folder_name }) => {
+    try {
+      const c = await getClient();
+      await c.editSubscription(subscription_id, { addToFolder: folder_name });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              success: true,
+              message: `Added subscription to folder '${folder_name}'`,
+            }),
+          },
+        ],
+      };
+    } catch (e) {
+      return handleToolError(e);
+    }
+  },
+);
+
+// Remove subscription from folder
+server.tool(
+  "remove_subscription_from_folder",
+  "Remove a subscription from a folder",
+  {
+    subscription_id: z
+      .string()
+      .describe("The subscription ID (e.g., feed/https://example.com/rss)"),
+    folder_name: z
+      .string()
+      .describe("The folder name to remove the subscription from"),
+  },
+  async ({ subscription_id, folder_name }) => {
+    try {
+      const c = await getClient();
+      await c.editSubscription(subscription_id, {
+        removeFromFolder: folder_name,
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              success: true,
+              message: `Removed subscription from folder '${folder_name}'`,
+            }),
+          },
+        ],
+      };
+    } catch (e) {
+      return handleToolError(e);
+    }
+  },
+);
+
+// Rename subscription
+server.tool(
+  "rename_subscription",
+  "Rename a subscription (change its title)",
+  {
+    subscription_id: z
+      .string()
+      .describe("The subscription ID (e.g., feed/https://example.com/rss)"),
+    title: z.string().describe("The new title for the subscription"),
+  },
+  async ({ subscription_id, title }) => {
+    try {
+      const c = await getClient();
+      await c.editSubscription(subscription_id, { title });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              success: true,
+              message: `Renamed subscription to '${title}'`,
+            }),
+          },
+        ],
+      };
+    } catch (e) {
+      return handleToolError(e);
+    }
+  },
+);
+
 // CLI commands
 async function runCli() {
   const args = process.argv.slice(2);

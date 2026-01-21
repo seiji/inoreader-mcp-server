@@ -529,9 +529,7 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              subscription_id,
-              folder_name,
-              action: "added_to_folder",
+              message: `Added subscription ${subscription_id} to folder '${folder_name}'`,
             }),
           },
         ],
@@ -566,9 +564,7 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              subscription_id,
-              folder_name,
-              action: "removed_from_folder",
+              message: `Removed subscription ${subscription_id} from folder '${folder_name}'`,
             }),
           },
         ],
@@ -599,9 +595,7 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              subscription_id,
-              title,
-              action: "renamed",
+              message: `Renamed subscription ${subscription_id} to '${title}'`,
             }),
           },
         ],

@@ -23,8 +23,20 @@ Built with [Bun](https://bun.sh/) for fast startup and low memory usage.
 
 ## Installation
 
+### Quick Start (via bunx)
+
+No installation required - run directly from GitHub:
+
 ```bash
-# Install dependencies
+bunx github:seiji/inoreader-mcp-server          # latest
+bunx github:seiji/inoreader-mcp-server#v0.1.0   # specific version
+```
+
+### Local Development
+
+```bash
+git clone https://github.com/seiji/inoreader-mcp-server.git
+cd inoreader-mcp-server
 bun install
 ```
 
@@ -74,11 +86,11 @@ bunx github:seiji/inoreader-mcp-server auth logout
 ### Running the Server
 
 ```bash
-# Start the MCP server (stdio transport)
-bun run start
+# Via bunx (recommended)
+bunx github:seiji/inoreader-mcp-server
 
-# Or directly
-bun run src/index.ts
+# Local development
+bun run start
 ```
 
 ### Claude Desktop Configuration

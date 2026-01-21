@@ -60,13 +60,13 @@ Tokens are securely stored in your system keychain:
 
 ```bash
 # Login - opens browser for OAuth authentication
-inoreader-mcp auth login
+bun run start auth login
 
 # Check authentication status
-inoreader-mcp auth status
+bun run start auth status
 
 # Logout - remove tokens from keychain
-inoreader-mcp auth logout
+bun run start auth logout
 ```
 
 ## Usage
@@ -100,7 +100,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Note**: After configuring, run `inoreader-mcp auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
+**Note**: After configuring, run `bun run start auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
 
 ### Docker
 
@@ -180,7 +180,7 @@ sudo apt install libsecret-tools
 
 ### "Token expired" errors
 
-Run `inoreader-mcp auth login` to re-authenticate.
+Run `bun run start auth login` to re-authenticate.
 
 ### Using without keychain
 

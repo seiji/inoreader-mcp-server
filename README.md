@@ -60,13 +60,13 @@ Tokens are securely stored in your system keychain:
 
 ```bash
 # Login - opens browser for OAuth authentication
-bun run start auth login
+bunx github:seiji/inoreader-mcp-server auth login
 
 # Check authentication status
-bun run start auth status
+bunx github:seiji/inoreader-mcp-server auth status
 
 # Logout - remove tokens from keychain
-bun run start auth logout
+bunx github:seiji/inoreader-mcp-server auth logout
 ```
 
 ## Usage
@@ -89,8 +89,8 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 {
   "mcpServers": {
     "inoreader": {
-      "command": "bun",
-      "args": ["run", "/path/to/inoreader-mcp-server/src/index.ts"],
+      "command": "bunx",
+      "args": ["github:seiji/inoreader-mcp-server"],
       "env": {
         "INOREADER_APP_ID": "your-app-id",
         "INOREADER_APP_KEY": "your-app-key"
@@ -100,7 +100,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Note**: After configuring, run `bun run start auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
+**Note**: After configuring, run `bunx github:seiji/inoreader-mcp-server auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
 
 ## Available Tools
 
@@ -162,7 +162,7 @@ sudo apt install libsecret-tools
 
 ### "Token expired" errors
 
-Run `bun run start auth login` to re-authenticate.
+Run `bunx github:seiji/inoreader-mcp-server auth login` to re-authenticate.
 
 ## Disclaimer
 

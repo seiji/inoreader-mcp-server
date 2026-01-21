@@ -217,7 +217,7 @@ export async function getValidAccessToken(): Promise<string> {
   const tokens = await loadTokens();
   if (!tokens) {
     throw new Error(
-      "Not authenticated. Run 'inoreader-mcp auth login' first, " +
+      "Not authenticated. Run 'bun run start auth login' first, " +
         "or set INOREADER_ACCESS_TOKEN environment variable.",
     );
   }
@@ -241,7 +241,7 @@ export async function getValidAccessToken(): Promise<string> {
       return newTokens.access_token;
     } catch (error) {
       throw new Error(
-        `Failed to refresh token: ${error}. Run 'inoreader-mcp auth login' to re-authenticate.`,
+        `Failed to refresh token: ${error}. Run 'bun run start auth login' to re-authenticate.`,
       );
     }
   }
@@ -261,7 +261,7 @@ export async function showStatus(): Promise<void> {
   const tokens = await loadTokens();
   if (!tokens) {
     console.log(
-      "Not authenticated. Run 'inoreader-mcp auth login' to authenticate.",
+      "Not authenticated. Run 'bun run start auth login' to authenticate.",
     );
     return;
   }

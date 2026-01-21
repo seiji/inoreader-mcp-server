@@ -525,7 +525,7 @@ async function runCli() {
         await showStatus();
         break;
       default:
-        console.log("Usage: inoreader-mcp auth <login|logout|status>");
+        console.log("Usage: bun run start auth <login|logout|status>");
         console.log("");
         console.log("Commands:");
         console.log("  login   - Authenticate with Inoreader (opens browser)");
@@ -540,10 +540,10 @@ async function runCli() {
     console.log("Inoreader MCP Server");
     console.log("");
     console.log("Usage:");
-    console.log("  inoreader-mcp              Start the MCP server (stdio)");
-    console.log("  inoreader-mcp auth login   Authenticate with Inoreader");
-    console.log("  inoreader-mcp auth logout  Remove saved tokens");
-    console.log("  inoreader-mcp auth status  Show authentication status");
+    console.log("  bun run start              Start the MCP server (stdio)");
+    console.log("  bun run start auth login   Authenticate with Inoreader");
+    console.log("  bun run start auth logout  Remove saved tokens");
+    console.log("  bun run start auth status  Show authentication status");
     console.log("");
     console.log("Environment variables:");
     console.log(

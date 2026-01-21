@@ -100,7 +100,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Note**: After configuring, run `bunx github:seiji/inoreader-mcp-server auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
+**Note**: Before running the auth command, ensure `INOREADER_APP_ID` and `INOREADER_APP_KEY` are set in your shell environment (see **2. Set Environment Variables** above). After configuring, run `bunx github:seiji/inoreader-mcp-server auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
 
 ## Available Tools
 

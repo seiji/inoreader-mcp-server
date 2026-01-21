@@ -274,6 +274,21 @@ export class InoreaderClient {
       removeFromFolder?: string;
     },
   ): Promise<void> {
+    if (!options.title && !options.addToFolder && !options.removeFromFolder) {
+      throw new InoreaderClientError(
+        "At least one option (title, addToFolder, or removeFromFolder) is required",
+      );
+    }
+    if (
+      options.addToFolder &&
+      options.removeFromFolder &&
+      options.addToFolder === options.removeFromFolder
+    ) {
+      throw new InoreaderClientError(
+        "Cannot add and remove from the same folder",
+      );
+    }
+
     const body = new URLSearchParams();
     body.append("ac", "edit");
     body.append("s", subscriptionId);
@@ -282,10 +297,16 @@ export class InoreaderClient {
       body.append("t", options.title);
     }
     if (options.addToFolder) {
-      body.append("a", `user/-/label/${options.addToFolder}`);
+      body.append(
+        "a",
+        `user/-/label/${encodeURIComponent(options.addToFolder)}`,
+      );
     }
     if (options.removeFromFolder) {
-      body.append("r", `user/-/label/${options.removeFromFolder}`);
+      body.append(
+        "r",
+        `user/-/label/${encodeURIComponent(options.removeFromFolder)}`,
+      );
     }
 
     await this.request<string>("POST", "/subscription/edit", undefined, body);

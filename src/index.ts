@@ -507,9 +507,9 @@ server.tool(
   },
 );
 
-// Move subscription to folder
+// Add subscription to folder
 server.tool(
-  "move_subscription_to_folder",
+  "add_subscription_to_folder",
   "Add a subscription to a folder",
   {
     subscription_id: z
@@ -529,7 +529,9 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              message: `Added subscription to folder '${folder_name}'`,
+              subscription_id,
+              folder_name,
+              action: "added_to_folder",
             }),
           },
         ],
@@ -564,7 +566,9 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              message: `Removed subscription from folder '${folder_name}'`,
+              subscription_id,
+              folder_name,
+              action: "removed_from_folder",
             }),
           },
         ],
@@ -595,7 +599,9 @@ server.tool(
             type: "text",
             text: JSON.stringify({
               success: true,
-              message: `Renamed subscription to '${title}'`,
+              subscription_id,
+              title,
+              action: "renamed",
             }),
           },
         ],

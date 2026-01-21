@@ -39,6 +39,7 @@ bun run start auth status  # Show authentication status
 - OAuth2 authentication with automatic token refresh
 - Secure token storage in system keychain
 - Batch API calls for marking multiple items as read/unread
+- Subscription folder management (add/remove from folders, rename)
 - All MCP tools return JSON responses
 
 ### Environment Variables

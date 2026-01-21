@@ -33,7 +33,9 @@ bun install
 ### 1. Get API Credentials
 
 1. Go to [Inoreader Developer Portal](https://www.inoreader.com/developers/)
-2. Register a new application
+2. Register a new application with these settings:
+   - **Redirect URI**: `http://localhost:19812/callback`
+   - **Scopes**: `read` and `write`
 3. Note your **App ID** and **App Key**
 
 ### 2. Set Environment Variables

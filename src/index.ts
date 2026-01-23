@@ -345,9 +345,11 @@ server.tool(
       .describe("Mark all articles in this feed/folder as read"),
     older_than: z
       .number()
+      .int()
+      .nonnegative()
       .optional()
       .describe(
-        "Unix timestamp - only mark articles published before this time as read (use with stream_id)",
+        "Unix timestamp in seconds - only mark articles published before this time as read (use with stream_id)",
       ),
   },
   async ({ item_ids, stream_id, older_than }) => {
@@ -371,7 +373,7 @@ server.tool(
 
       const message = item_ids
         ? `Marked ${item_ids.length} items as read`
-        : older_than
+        : older_than !== undefined
           ? `Marked items older than ${new Date(older_than * 1000).toISOString()} in ${stream_id} as read`
           : `Marked all items in ${stream_id} as read`;
 

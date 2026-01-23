@@ -109,7 +109,9 @@ export class InoreaderClient {
     if (contentType?.includes("application/json")) {
       return response.json() as Promise<T>;
     }
-    return response.text() as unknown as Promise<T>;
+    throw new InoreaderClientError(
+      `Expected JSON response but received content-type: ${contentType ?? "unknown"}`,
+    );
   }
 
   async getUserInfo(): Promise<UserInfo> {

@@ -62,7 +62,11 @@ function handleToolError(e: unknown) {
   if (e instanceof AuthenticationError) {
     setTimeout(async () => {
       console.error("Authentication failed. Disconnecting MCP server...");
-      await server.close();
+      try {
+        await server.close();
+      } catch (closeError) {
+        console.error("Error closing server:", closeError);
+      }
     }, 100);
   }
 

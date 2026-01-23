@@ -1,4 +1,5 @@
 import { getValidAccessToken, refreshAccessToken } from "./auth.js";
+import { AuthenticationError, InoreaderClientError } from "./errors.js";
 import { loadTokens, saveTokens } from "./keychain.js";
 import type {
   Config,
@@ -9,19 +10,7 @@ import type {
   UserInfo,
 } from "./types.js";
 
-export class InoreaderClientError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "InoreaderClientError";
-  }
-}
-
-export class AuthenticationError extends InoreaderClientError {
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthenticationError";
-  }
-}
+export { AuthenticationError, InoreaderClientError };
 
 export class InoreaderClient {
   private config: Config;

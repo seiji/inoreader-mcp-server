@@ -354,13 +354,43 @@ server.tool(
   },
   async ({ item_ids, stream_id, older_than }) => {
     try {
-      if (!item_ids && !stream_id) {
+      const hasItemIds = item_ids && item_ids.length > 0;
+
+      if (!hasItemIds && !stream_id) {
         return {
           content: [
             {
               type: "text",
               text: JSON.stringify({
-                error: "Provide either item_ids or stream_id",
+                error: "Provide either item_ids (non-empty) or stream_id",
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      if (older_than !== undefined && !stream_id) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                error: "older_than requires stream_id",
+              }),
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      if (older_than !== undefined && hasItemIds) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                error: "older_than cannot be used with item_ids",
               }),
             },
           ],
@@ -371,8 +401,8 @@ server.tool(
       const c = await getClient();
       await c.markAsRead(item_ids, stream_id, older_than);
 
-      const message = item_ids
-        ? `Marked ${item_ids.length} items as read`
+      const message = hasItemIds
+        ? `Marked ${item_ids?.length} items as read`
         : older_than !== undefined
           ? `Marked items older than ${new Date(older_than * 1000).toISOString()} in ${stream_id} as read`
           : `Marked all items in ${stream_id} as read`;

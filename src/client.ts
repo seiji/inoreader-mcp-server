@@ -105,13 +105,25 @@ export class InoreaderClient {
 
     // Reset retry flag on success
     this.hasRetriedAuth = false;
-    const contentType = response.headers.get("content-type");
-    if (contentType?.includes("application/json")) {
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    // Prefer JSON when explicitly indicated
+    if (contentType.includes("application/json")) {
       return response.json() as Promise<T>;
     }
-    throw new InoreaderClientError(
-      `Expected JSON response but received content-type: ${contentType ?? "unknown"}`,
-    );
+
+    // Handle no-content responses
+    if (response.status === 204 || response.status === 205) {
+      return undefined as T;
+    }
+
+    // Fallback to text for non-JSON responses (e.g., plain text or empty body)
+    const text = await response.text();
+    if (!text) {
+      return undefined as T;
+    }
+    return text as unknown as T;
   }
 
   async getUserInfo(): Promise<UserInfo> {

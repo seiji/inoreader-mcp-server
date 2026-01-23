@@ -3,7 +3,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { login, logout, showStatus } from "./auth.js";
-import { type InoreaderClient, createClient } from "./client.js";
+import {
+  AuthenticationError,
+  type InoreaderClient,
+  createClient,
+} from "./client.js";
 import type { StreamContentsResponse, StreamItem } from "./types.js";
 
 let client: InoreaderClient | null = null;
@@ -53,6 +57,15 @@ function formatArticle(item: StreamItem) {
 
 function handleToolError(e: unknown) {
   const message = e instanceof Error ? e.message : String(e);
+
+  // Disconnect server on authentication failure
+  if (e instanceof AuthenticationError) {
+    setTimeout(async () => {
+      console.error("Authentication failed. Disconnecting MCP server...");
+      await server.close();
+    }, 100);
+  }
+
   return {
     content: [
       { type: "text" as const, text: JSON.stringify({ error: message }) },

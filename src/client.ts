@@ -105,7 +105,11 @@ export class InoreaderClient {
 
     // Reset retry flag on success
     this.hasRetriedAuth = false;
-    return response.json() as Promise<T>;
+    const contentType = response.headers.get("content-type");
+    if (contentType?.includes("application/json")) {
+      return response.json() as Promise<T>;
+    }
+    return response.text() as unknown as Promise<T>;
   }
 
   async getUserInfo(): Promise<UserInfo> {

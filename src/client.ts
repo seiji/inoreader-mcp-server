@@ -1,4 +1,5 @@
 import { getValidAccessToken, refreshAccessToken } from "./auth.js";
+import { AuthenticationError, InoreaderClientError } from "./errors.js";
 import { loadTokens, saveTokens } from "./keychain.js";
 import type {
   Config,
@@ -9,19 +10,7 @@ import type {
   UserInfo,
 } from "./types.js";
 
-export class InoreaderClientError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "InoreaderClientError";
-  }
-}
-
-export class AuthenticationError extends InoreaderClientError {
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthenticationError";
-  }
-}
+export { AuthenticationError, InoreaderClientError };
 
 export class InoreaderClient {
   private config: Config;
@@ -116,7 +105,25 @@ export class InoreaderClient {
 
     // Reset retry flag on success
     this.hasRetriedAuth = false;
-    return response.json() as Promise<T>;
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    // Prefer JSON when explicitly indicated
+    if (contentType.includes("application/json")) {
+      return response.json() as Promise<T>;
+    }
+
+    // Handle no-content responses
+    if (response.status === 204 || response.status === 205) {
+      return undefined as T;
+    }
+
+    // Fallback to text for non-JSON responses (e.g., plain text or empty body)
+    const text = await response.text();
+    if (!text) {
+      return undefined as T;
+    }
+    return text as unknown as T;
   }
 
   async getUserInfo(): Promise<UserInfo> {

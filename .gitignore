@@ -3,6 +3,7 @@
 !.claude/settings.json
 .serena/
 plans/
+.mcp.json
 
 # Dependencies
 node_modules/

@@ -50,14 +50,14 @@ up pending promises and timers. Any future live integration tests should be
 explicitly opt-in and separate from the default suite.
 
 See [tests/README.md](tests/README.md) for coverage, mock isolation requirements,
-unverified integration behavior, and the current test-first status. The suite
-currently contains known failing regression tests. Report these separately from
-new failures; this temporary Red state is not permission to bypass checks or
-merge failing changes.
+unverified integration behavior, and the current test status. When introducing
+regression tests, report expected Red tests separately from unrelated failures.
+The test-first Red stage is temporary, not permission to bypass checks or merge
+failing changes.
 
 Both CI and the release workflow run tests, type checking, and linting. Test
 failures fail the check jobs and prevent the dependent Release Please job from
-running. Fix the known regressions before expecting either workflow to pass.
+running. All tests must pass before merging or releasing.
 
 ## Pull Requests
 

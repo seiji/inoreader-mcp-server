@@ -18,7 +18,7 @@ cases are mapped by their existing descriptive names below.
 | ID | Evidence | Status | Remaining scenarios |
 | --- | --- | --- | --- |
 | MCP-001 | contract: initializes over stdio and lists all public tools | Partial / Green | Schema details for every argument, protocol compatibility revisions |
-| MCP-002 | regression: starting auth / logout stdout assertions | Partial / Red | Raw stdout validation, auth tool calls through stdio, non-console writes |
+| MCP-002 | regression: starting auth / logout stdout assertions; contract: logout and SDK transport error checks | Partial / Green | Raw stdout validation, login/complete through stdio, non-console writes |
 | ERROR-001 | contract: API failure + successful read/mutation payloads | Partial / Green | Error propagation for every mutation, malformed upstream data, storage errors |
 | ERROR-002 | contract: unauthenticated read has no API call | Partial / Green | Other read/mutation tools, revoked credentials |
 | INPUT-001 | contract: article counts 0/101 rejected, fixture detects API access | Partial / Green | Wrong types, missing required args, count 1/100 for both article tools, unknown tools |
@@ -28,13 +28,13 @@ cases are mapped by their existing descriptive names below.
 | READ-004 | contract: empty page and absent continuation | Partial / Green | Empty starred page, terminal page after continuation |
 | WRITE-001 | contract: four invalid combinations with API forbidden; valid ID and timestamp paths | Partial / Green | Negative/fractional timestamps, stream-only and empty-array+stream, pending D-001/D-002 |
 | WRITE-002 | contract: success response for all mutation tools; regression: batch IDs | Partial / Green | Exact upstream request/effect for each mutation, failure/partial batch behavior; success fixtures alone do not prove effects |
-| API-001 | regression: add/remove folders with ASCII/space/Japanese/percent names | Partial / Red | API contract through MCP, slash-containing names and real provider behavior |
-| TIME-001 | regression: timestamps 0 and positive | Provisional / Red | Approve D-001, omitted timestamp, upper range, upstream timestamp semantics |
+| API-001 | regression: add/remove folders with ASCII/space/Japanese/percent names | Partial / Green | API contract through MCP, slash-containing names and real provider behavior |
+| TIME-001 | regression: timestamps 0 and positive; implementation preserves accepted zero for compatibility | Provisional / Green | Approve D-001, omitted timestamp, upper range, upstream timestamp semantics |
 | AUTH-001 | contract: environment status has no credentials | Partial / Green | Keychain/unavailable/expired/unknown-expiry status |
-| AUTH-002 | contract: complete without login | Partial / Green | Login/complete success over MCP, cache invalidation, logout, concurrent auth calls (D-004) |
+| AUTH-002 | contract: complete without login; logout succeeds and environment token remains active | Partial / Green | Login/complete success over MCP, cache invalidation, concurrent auth calls (D-004) |
 | AUTH-003 | regression: environment priority, missing/valid/expired tokens | Partial / Green | Five-minute boundary, refresh-token fallback, refresh/network/storage failure |
-| AUTH-004 | regression: valid callback, state missing/mismatch, provider denial | Partial / Red | Invalid state followed by valid callback, unique state, timeout/cancel/missing-code, unhandled rejection prevention |
-| API-002 | regression: single 401, second 401, concurrent 401 | Partial / Red | POST preservation, failed shared refresh, independent successive requests |
+| AUTH-004 | regression: valid callback, state missing/mismatch, provider denial, invalid callback followed by valid callback | Partial / Green | Unique state, timeout/cancel/missing-code, unhandled rejection prevention |
+| API-002 | regression: single/second/concurrent/late 401, POST preservation, failed shared refresh, recovery on a later request | Partial / Green | Higher concurrency, refresh-token rotation, storage failures during shared refresh |
 | API-003 | regression: JSON reads and text mutations; contract: 500 response | Partial / Green | 403/429/other 5xx, empty/204/205, invalid JSON, transport errors |
 
 No ID is claimed fully covered. Draft decisions D-001 through D-006 are not
@@ -65,7 +65,7 @@ coverage. Strengthen adapter request tests before claiming WRITE-002 is complete
 # Public MCP contract cases only
 bun test tests/mcp-contract.test.ts
 
-# All tests, including known Red regressions
+# All tests, including review regressions
 bun run test
 
 # In-process execution coverage

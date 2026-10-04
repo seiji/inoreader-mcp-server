@@ -154,7 +154,7 @@ concurrent login/complete/logout semantics are not yet a stable contract.
 
 | ID | Proposal / unresolved question | Current evidence |
 | --- | --- | --- |
-| D-001 | For `older_than: 0`, preserve the accepted value; alternatively reject zero explicitly. Never silently broaden the operation. | Existing Red test selects preservation provisionally, not as an approved policy. |
+| D-001 | For `older_than: 0`, preserve the accepted value; alternatively reject zero explicitly. Never silently broaden the operation. | The compatibility fix now preserves zero because the existing schema accepts it. Tightening that schema remains a separate decision; passing tests alone do not approve a policy change. |
 | D-002 | Reject simultaneous non-empty item IDs and stream even without a timestamp? | Current code selects IDs; no new rejection test until decided. |
 | D-003 | Require integer article counts, non-empty IDs/names and valid feed URLs? | Current schemas permit fractional counts, empty strings, and arbitrary URL strings. |
 | D-004 | On logout, cancel a pending login and prevent late token saves? How should concurrent auth calls behave? | Current logout does not cancel the pending flow. |

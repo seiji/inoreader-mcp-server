@@ -8,7 +8,9 @@ bun run typecheck
 bun run lint
 ```
 
-This is the test-first (Red) stage: assertions describe intended behavior, not the existing bugs. Some tests currently fail until the production fixes are implemented. Do not skip these tests or change their expectations to match the bugs.
+The known review regressions have been fixed and the current suite is Green.
+Assertions describe intended behavior; do not skip tests or change expectations
+to accommodate bugs. Passing tests do not imply complete specification coverage.
 
 ## Specification and contract tests
 
@@ -39,7 +41,8 @@ Run these separately with `bun test tests/mcp-contract.test.ts`.
 - Auth promises are observed and cancelled during cleanup to avoid unhandled rejections or leftover timers.
 - The concurrent 401 test uses a controlled refresh promise, not timing-based sleeps.
 
-The tests cover token selection and refresh, OAuth success and denial, missing/incorrect OAuth state, stdout logging, pagination, batch item IDs, timestamp boundaries, folder encoding, and single/concurrent 401 retries.
+The tests cover token selection and refresh, OAuth success and denial, missing/incorrect OAuth state, stdout logging, pagination, batch item IDs, timestamp boundaries, folder encoding, and single/concurrent 401 retries, including shared failure, late 401 responses,
+recovery after a failed refresh, and POST preservation.
 
 These tests share process-wide mocks and must not run concurrently. Bun module mocks persist after `mock.restore()`; other test files that need the real credential-store module should run in a separate process or adopt a shared mocking strategy.
 
@@ -47,14 +50,16 @@ These tests share process-wide mocks and must not run concurrently. Bun module m
 
 - Real Inoreader API responses and OAuth provider behavior.
 - Real macOS Keychain / Linux libsecret integration.
-- Auth login/logout over MCP and strict raw stdout validation. Offline stdio
-  initialization, discovery, and read/mutation calls are now tested; existing
-  stdout regressions still assert only calls to `console.log`.
+- Auth login/complete over MCP and strict raw stdout validation. Offline stdio
+  initialization, discovery, logout, and read/mutation calls are tested, and SDK
+  transport parsing errors are checked. Internal stdout regressions also assert
+  calls to `console.log`; this is not a complete raw-stream conformance test.
 - Browser launching, actual callback-server binding, and the five-minute timeout.
 
 The current main branch has matching README and implementation redirect URIs (`http://localhost:19812/callback`). The earlier mismatch finding applied only to `support-windows`.
 
-Both `.github/workflows/ci.yaml` and `.github/workflows/release.yaml` run `bun run test` alongside lint and type checking. Failures are not ignored: while the regression tests are Red, both check jobs fail and the dependent Release Please job does not run. Fix the production regressions to make these checks green; do not bypass them.
+Both `.github/workflows/ci.yaml` and `.github/workflows/release.yaml` run `bun run test` alongside lint and type checking. Failures are not ignored: any failing regression causes its check job to fail
+and prevents the dependent Release Please job from running. Do not bypass failures.
 
 Bun coverage in the parent test runner does not aggregate execution in contract-
 test subprocesses. Use the specification coverage matrix to track those cases;

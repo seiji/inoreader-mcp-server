@@ -1,6 +1,6 @@
 {
   "name": "inoreader-mcp-server",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "MCP Server for Inoreader RSS feed management",
   "type": "module",
   "main": "src/index.ts",

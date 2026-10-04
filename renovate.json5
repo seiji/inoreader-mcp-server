@@ -4,5 +4,10 @@
     "config:recommended",
     ":semanticCommits",
     ":semanticCommitTypeAll(chore)"
-  ]
+  ],
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 10,
+  "major": {
+    "dependencyDashboardApproval": true
+  }
 }

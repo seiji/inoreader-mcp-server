@@ -333,7 +333,9 @@ server.tool(
     continuation: z
       .string()
       .optional()
-      .describe("Continuation token from a previous get_articles response for pagination"),
+      .describe(
+        "Continuation token from a previous get_articles response for pagination",
+      ),
   },
   async ({ stream_id, count, unread_only, continuation }) => {
     try {
@@ -386,7 +388,9 @@ server.tool(
     continuation: z
       .string()
       .optional()
-      .describe("Continuation token from a previous get_starred_articles response for pagination"),
+      .describe(
+        "Continuation token from a previous get_starred_articles response for pagination",
+      ),
   },
   async ({ count, continuation }) => {
     try {

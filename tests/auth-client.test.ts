@@ -229,6 +229,24 @@ describe("authentication", () => {
     });
   }
 
+  test("[AUTH-004] an invalid callback leaves the legitimate auth flow usable", async () => {
+    fetchMock.mockImplementation(async () => Response.json(tokenResponse));
+    const flow = await beginAuthFlow();
+    const invalid = await sendCallback(
+      new URLSearchParams({ code: "untrusted", state: "wrong" }),
+    );
+    expect(invalid.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+    const state = new URL(flow.authUrl).searchParams.get("state") ?? "";
+    const valid = await sendCallback(
+      new URLSearchParams({ code: "trusted", state }),
+    );
+    expect(valid.status).toBe(200);
+    expect(await flowResult).toEqual({});
+    expect(requestBody().get("code")).toBe("trusted");
+    expect(saveTokens).toHaveBeenCalledTimes(1);
+  });
+
   test("README registration instructions match the OAuth redirect URI", async () => {
     const flow = await beginAuthFlow();
     const redirectUri = new URL(flow.authUrl).searchParams.get("redirect_uri");
@@ -338,6 +356,122 @@ describe("API client", () => {
     );
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(saveTokens).toHaveBeenCalledTimes(1);
+  });
+
+  test("[API-002] a later request can refresh after a previous refresh failure", async () => {
+    loadTokens.mockResolvedValue({
+      accessToken: "old-token",
+      refreshToken: "old-refresh-token",
+    });
+    let refreshCount = 0;
+    fetchMock.mockImplementation(async (input, init) => {
+      if (String(input).endsWith("/token")) {
+        refreshCount++;
+        return refreshCount === 1
+          ? new Response("failed", { status: 500 })
+          : Response.json(tokenResponse);
+      }
+      return new Headers(init?.headers).get("Authorization") ===
+        "Bearer old-token"
+        ? new Response(null, { status: 401 })
+        : Response.json(userInfo);
+    });
+    const c = client();
+    await expect(c.getUserInfo()).rejects.toBeInstanceOf(AuthenticationError);
+    expect(await c.getUserInfo()).toEqual(userInfo);
+    expect(refreshCount).toBe(2);
+  });
+
+  test("[API-002] a late 401 for an old token reuses the completed refresh", async () => {
+    loadTokens.mockResolvedValue({
+      accessToken: "old-token",
+      refreshToken: "old-refresh-token",
+    });
+    const lateResponse = Promise.withResolvers<Response>();
+    let oldRequestCount = 0;
+    let refreshCount = 0;
+    fetchMock.mockImplementation(async (input, init) => {
+      if (String(input).endsWith("/token")) {
+        refreshCount++;
+        return Response.json(tokenResponse);
+      }
+      if (
+        new Headers(init?.headers).get("Authorization") === "Bearer old-token"
+      ) {
+        oldRequestCount++;
+        return oldRequestCount === 2
+          ? lateResponse.promise
+          : new Response(null, { status: 401 });
+      }
+      return Response.json(userInfo);
+    });
+    const c = client();
+    const first = c.getUserInfo();
+    const second = Promise.allSettled([c.getUserInfo()]);
+    try {
+      expect(await first).toEqual(userInfo);
+    } finally {
+      lateResponse.resolve(new Response(null, { status: 401 }));
+      await second;
+    }
+    expect(await second).toEqual([{ status: "fulfilled", value: userInfo }]);
+    expect(refreshCount).toBe(1);
+  });
+
+  test("[API-002] a POST retry retains its method and repeated item IDs", async () => {
+    loadTokens.mockResolvedValue({
+      accessToken: "old-token",
+      refreshToken: "old-refresh-token",
+    });
+    fetchMock.mockImplementation(async (input, init) => {
+      if (String(input).endsWith("/token")) return Response.json(tokenResponse);
+      return new Headers(init?.headers).get("Authorization") ===
+        "Bearer old-token"
+        ? new Response(null, { status: 401 })
+        : new Response("OK");
+    });
+    await client().markAsRead(["item-1", "item-2"]);
+    const attempts = fetchMock.mock.calls.filter(([input]) =>
+      String(input).endsWith("/edit-tag"),
+    );
+    expect(attempts).toHaveLength(2);
+    for (const [, init] of attempts) {
+      expect(init?.method).toBe("POST");
+      expect(new URLSearchParams(String(init?.body)).getAll("i")).toEqual([
+        "item-1",
+        "item-2",
+      ]);
+    }
+  });
+
+  test("[API-002] a failed shared refresh rejects all waiting requests", async () => {
+    loadTokens.mockResolvedValue({
+      accessToken: "old-token",
+      refreshToken: "old-refresh-token",
+    });
+    const refreshStarted = Promise.withResolvers<void>();
+    const refreshResponse = Promise.withResolvers<Response>();
+    let refreshCount = 0;
+    fetchMock.mockImplementation(async (input) => {
+      if (String(input).endsWith("/token")) {
+        refreshCount++;
+        refreshStarted.resolve();
+        return refreshResponse.promise;
+      }
+      return new Response(null, { status: 401 });
+    });
+    const c = client();
+    const results = Promise.allSettled([c.getUserInfo(), c.getUserInfo()]);
+    await refreshStarted.promise;
+    refreshResponse.resolve(new Response("failed", { status: 500 }));
+    const settled = await results;
+    for (const result of settled) {
+      expect(result.status).toBe("rejected");
+      if (result.status === "rejected")
+        expect(result.reason).toBeInstanceOf(AuthenticationError);
+    }
+    expect(refreshCount).toBe(1);
+    expect(saveTokens).not.toHaveBeenCalled();
   });
 
   test("concurrent 401 requests share refresh and both succeed", async () => {

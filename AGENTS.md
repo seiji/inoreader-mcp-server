@@ -24,6 +24,24 @@ bun run start auth logout  # Remove saved tokens from keychain
 bun run start auth status  # Show authentication status
 ```
 
+## Contribution Workflow
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before preparing changes or PRs. It is
+  the source of truth for contribution, versioning, and release policies.
+- Keep changes focused on one concern and run the relevant tests, type checker,
+  and linter. See `tests/README.md` for the current test-first status.
+- Use Conventional Commit PR titles: `<type>[optional scope][!]: <description>`.
+  Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+  `build`, `ci`, `chore`, and `revert`. For example, `fix(auth): handle expired
+  tokens`. Use `!` for breaking changes.
+- Use squash merging with the validated PR title as the squash commit message.
+  Individual commits within a PR do not need to follow Conventional Commits.
+- Wait for required checks, including **Validate PR title**, to pass before merging.
+- Release Please manages version bumps, release tags, and GitHub Releases. Do
+  not manually update `package.json` versions or `.release-please-manifest.json`,
+  or create release tags, unless explicitly performing a release migration or
+  recovery.
+
 ## Architecture Overview
 
 ### Entry Point

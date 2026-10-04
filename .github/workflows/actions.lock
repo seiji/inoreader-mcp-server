@@ -6,28 +6,36 @@ workflows:
     '.github/workflows/ci.yml':
         - 'actions/checkout@v7.0.1'
         - 'oven-sh/setup-bun@v2.2.0'
+    '.github/workflows/pr-title.yml':
+        - 'amannn/action-semantic-pull-request@v6.1.1'
     '.github/workflows/release.yml':
-        - 'actions/checkout@v4.4.0'
+        - 'actions/checkout@v7.0.1'
+        - 'actions/create-github-app-token@v3.2.0'
+        - 'googleapis/release-please-action@v4.4.1'
         - 'oven-sh/setup-bun@v2.2.0'
-        - 'softprops/action-gh-release@v2.6.2'
 dependencies:
-    'actions/checkout@v4.4.0':
-        ref: 'v4.4.0'
-        commit: 'sha1-11d5960a326750d5838078e36cf38b85af677262'
-        owner_id: 44036562
-        repo_id: 197814629
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
+    'actions/create-github-app-token@v3.2.0':
+        ref: 'v3.2.0'
+        commit: 'sha1-bcd2ba49218906704ab6c1aa796996da409d3eb1'
+        owner_id: 44036562
+        repo_id: 642580244
+    'amannn/action-semantic-pull-request@v6.1.1':
+        ref: 'v6.1.1'
+        commit: 'sha1-48f256284bd46cdaab1048c3721360e808335d50'
+        owner_id: 4038316
+        repo_id: 220418983
+    'googleapis/release-please-action@v4.4.1':
+        ref: 'v4.4.1'
+        commit: 'sha1-5c625bfb5d1ff62eadeeb3772007f7f66fdcf071'
+        owner_id: 16785467
+        repo_id: 262236530
     'oven-sh/setup-bun@v2.2.0':
         ref: 'v2.2.0'
         commit: 'sha1-0c5077e51419868618aeaa5fe8019c62421857d6'
         owner_id: 108928776
         repo_id: 512644635
-    'softprops/action-gh-release@v2.6.2':
-        ref: 'v2.6.2'
-        commit: 'sha1-3bb12739c298aeb8a4eeaf626c5b8d85266b0e65'
-        owner_id: 2242
-        repo_id: 204253808

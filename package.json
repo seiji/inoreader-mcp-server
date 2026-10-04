@@ -11,8 +11,9 @@
     "start": "bun run src/index.ts",
     "dev": "bun run --watch src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "biome check src/",
-    "format": "biome format --write src/"
+    "lint": "biome check src/ tests/",
+    "format": "biome format --write src/ tests/",
+    "test": "bun test tests/"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

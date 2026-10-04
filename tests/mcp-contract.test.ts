@@ -8,6 +8,7 @@ import { expectedArticles, userInfo } from "./fixtures/inoreader.js";
 let client: Client | undefined;
 let transport: StdioClientTransport | undefined;
 let stderr = "";
+let transportErrors: Error[] = [];
 
 async function connect(env: Record<string, string> = {}) {
   client = new Client({ name: "contract-tests", version: "1.0.0" });
@@ -28,6 +29,10 @@ async function connect(env: Record<string, string> = {}) {
     stderr: "pipe",
   });
   stderr = "";
+  transportErrors = [];
+  transport.onerror = (error) => {
+    transportErrors.push(error);
+  };
   transport.stderr?.on("data", (chunk) => {
     stderr += String(chunk);
   });
@@ -44,6 +49,7 @@ afterEach(async () => {
     transport = undefined;
   }
   expect(stderr).not.toContain("UNEXPECTED_API_CALL");
+  expect(transportErrors).toEqual([]);
 });
 
 async function call(name: string, args: Record<string, unknown> = {}) {
@@ -114,6 +120,19 @@ describe("MCP contract", () => {
     const result = await call("auth_complete");
     expect(result.isError).toBe(true);
     expect(payload(result)).toMatchObject({ error: expect.any(String) });
+  });
+
+  test("[AUTH-002/MCP-002] logout succeeds over stdio without protocol parsing errors", async () => {
+    await connect();
+    const result = await call("auth_logout");
+    expect(result.isError).not.toBe(true);
+    expect(payload(result)).toMatchObject({
+      success: true,
+      message: expect.any(String),
+    });
+    expect(payload(await call("auth_status"))).toMatchObject({
+      source: "environment",
+    });
   });
 
   for (const [name, expected] of [

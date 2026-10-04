@@ -11,6 +11,9 @@ bun install
 # Run in development mode (with watch)
 bun run dev
 
+# Run tests
+bun run test
+
 # Type check
 bun run typecheck
 
@@ -21,9 +24,40 @@ bun run lint
 bun run format
 ```
 
-Before opening a PR, run the type checker and linter. For API credentials and
-authentication, see the [README](README.md#authentication). Never commit
+Before opening a PR, run the tests, type checker, and linter. For API credentials
+and authentication, see the [README](README.md#authentication). Never commit
 credentials or tokens.
+
+### Testing
+
+Use Bun's test runner (`bun run test`). Test files live in `tests/` and are also
+included in type checking, linting, and formatting.
+
+Start from the draft [MCP specification](docs/specification.md), not the current
+implementation alone. Keep [specification-to-test coverage](docs/test-coverage.md)
+updated when adding behavior or tests. Public contract tests reference specification
+IDs; document unresolved decisions before treating a new expectation as a stable
+contract. Passing response tests do not by themselves prove upstream side effects.
+
+For bug fixes, first add a regression test that reproduces the problem, then
+fix the implementation and verify that the test passes. Assert intended behavior;
+do not skip tests or weaken expectations to accommodate existing bugs.
+
+Keep the default test suite independent of external services: mock API requests
+and OS credential storage, and do not use real credentials, launch browsers, or
+open listening ports. Restore global mocks and environment variables, and clean
+up pending promises and timers. Any future live integration tests should be
+explicitly opt-in and separate from the default suite.
+
+See [tests/README.md](tests/README.md) for coverage, mock isolation requirements,
+unverified integration behavior, and the current test-first status. The suite
+currently contains known failing regression tests. Report these separately from
+new failures; this temporary Red state is not permission to bypass checks or
+merge failing changes.
+
+Both CI and the release workflow run tests, type checking, and linting. Test
+failures fail the check jobs and prevent the dependent Release Please job from
+running. Fix the known regressions before expecting either workflow to pass.
 
 ## Pull Requests
 
@@ -98,14 +132,14 @@ Do not manually bump `package.json`, edit `.release-please-manifest.json`, or
 create release tags during normal development.
 
 1. Merge feature and fix PRs into `main` using the merge policy above.
-2. After type checking and linting pass, Release Please creates or updates a
+2. After tests, type checking, and linting pass, Release Please creates or updates a
    release PR containing the next version in `package.json` and
    `.release-please-manifest.json`, plus `CHANGELOG.md`.
 3. Review the version and changelog, wait for required checks to pass, and merge
    the release PR when ready to release. Several development PRs can be grouped
    into one release.
-4. On the resulting push to `main`, the release workflow runs type checking and
-   linting again. If they pass, Release Please creates the matching `v<version>`
+4. On the resulting push to `main`, the release workflow runs tests, type checking,
+   and linting again. If they pass, Release Please creates the matching `v<version>`
    tag and GitHub Release.
 
 This setup publishes GitHub Releases only; it does not publish to npm. The

@@ -146,8 +146,12 @@ Once configured with Claude, you can:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development commands, PR title
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and testing commands, PR title
 conventions, the squash merge policy, versioning rules, and release procedures.
+
+The draft [MCP specification](docs/specification.md) defines the public contract
+and pending design decisions. See [specification-to-test coverage](docs/test-coverage.md)
+for tested scenarios and remaining gaps.
 
 ## Repository Administration
 

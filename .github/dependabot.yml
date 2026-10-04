@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Disable version updates; security updates are triggered by alerts.
+    open-pull-requests-limit: 0
+    commit-message:
+      prefix: "fix(deps)"

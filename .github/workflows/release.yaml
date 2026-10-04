@@ -29,6 +29,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Create GitHub App token
         id: app-token

@@ -3,12 +3,12 @@
 # Docs: https://gh.io/actions-lockfile
 version: 'v0.0.2'
 workflows:
-    '.github/workflows/ci.yml':
+    '.github/workflows/ci.yaml':
         - 'actions/checkout@v7.0.1'
         - 'oven-sh/setup-bun@v2.2.0'
-    '.github/workflows/pr-title.yml':
+    '.github/workflows/pr-title.yaml':
         - 'amannn/action-semantic-pull-request@v6.1.1'
-    '.github/workflows/release.yml':
+    '.github/workflows/release.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.2.0'
         - 'googleapis/release-please-action@v4.4.1'

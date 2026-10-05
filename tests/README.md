@@ -16,7 +16,7 @@ to accommodate bugs. Passing tests do not imply complete specification coverage.
 
 The draft [MCP specification](../docs/specification.md) distinguishes baseline
 behavior, required safety properties, and unresolved decisions. The
-[coverage matrix](../docs/test-coverage.md) maps requirements to tests and lists
+[coverage matrix](../docs/test_coverage.md) maps requirements to tests and lists
 missing cases. In particular, the zero-timestamp expectation remains provisional
 until its policy is approved; never silently broaden an accepted operation.
 

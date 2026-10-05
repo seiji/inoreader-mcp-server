@@ -8,7 +8,7 @@ This is a behavioral contract, not a claim that every requirement is implemented
 - **Decision pending** is a proposal requiring maintainer approval before becoming a
   new compatibility guarantee. Existing tests do not by themselves approve proposals.
 
-Normative IDs below are mapped to evidence in [test coverage](test-coverage.md).
+Normative IDs below are mapped to evidence in [test coverage](test_coverage.md).
 SDK-generated descriptions, exact human-readable messages, JSON indentation, and
 object key order are not compatibility guarantees. Protocol/server version policy
 is a decision pending; the current server advertises a version different from

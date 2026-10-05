@@ -35,7 +35,7 @@ bun run start auth status  # Show authentication status
   and linter. See [tests/README.md](tests/README.md) for coverage, mock isolation,
   and the current test-first status.
 - Read [docs/specification.md](docs/specification.md) for public contracts and
-  pending decisions. Maintain [docs/test-coverage.md](docs/test-coverage.md) and
+  pending decisions. Maintain [docs/test_coverage.md](docs/test_coverage.md) and
   reference specification IDs in public contract tests; do not infer full coverage
   from line percentages or approve unresolved policies implicitly.
 - For bug fixes, add a failing regression test before changing the implementation.

@@ -34,7 +34,7 @@ Use Bun's test runner (`bun run test`). Test files live in `tests/` and are also
 included in type checking, linting, and formatting.
 
 Start from the draft [MCP specification](docs/specification.md), not the current
-implementation alone. Keep [specification-to-test coverage](docs/test-coverage.md)
+implementation alone. Keep [specification-to-test coverage](docs/test_coverage.md)
 updated when adding behavior or tests. Public contract tests reference specification
 IDs; document unresolved decisions before treating a new expectation as a stable
 contract. Passing response tests do not by themselves prove upstream side effects.
@@ -97,7 +97,7 @@ squash commit message consistent with the validated PR title: title validation
 does not prevent manual changes to the message in the merge dialog.
 
 For repository settings that enforce this policy, see
-[Required PR title check](README.md#required-pr-title-check).
+[Required PR title check](docs/repository_administration.md#required-pr-title-check).
 
 ## Versioning
 
@@ -146,4 +146,4 @@ This setup publishes GitHub Releases only; it does not publish to npm. The
 migration starts from the existing `v0.3.0` release, with subsequent commits used
 for the first automated changelog.
 
-For GitHub App credentials, see [Maintainer setup](README.md#maintainer-setup).
+For GitHub App credentials, see [Maintainer setup](docs/repository_administration.md#maintainer-setup).

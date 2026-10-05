@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 10,
+  "major": {
+    "dependencyDashboardApproval": true
+  }
+}

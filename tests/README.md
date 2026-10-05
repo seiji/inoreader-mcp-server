@@ -1,6 +1,6 @@
 # Review regression tests
 
-Run with Bun (validated with 1.3.6):
+Run with the Bun version pinned in [`.bun-version`](../.bun-version):
 
 ```bash
 bun run test

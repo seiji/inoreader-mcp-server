@@ -15,7 +15,7 @@ export { AuthenticationError, InoreaderClientError };
 export class InoreaderClient {
   private config: Config;
   private accessToken: string;
-  private hasRetriedAuth = false;
+  private refreshPromise: Promise<boolean> | null = null;
 
   constructor(config: Config, accessToken: string) {
     this.config = config;
@@ -45,11 +45,21 @@ export class InoreaderClient {
     }
   }
 
+  private async refreshToken(): Promise<boolean> {
+    if (!this.refreshPromise) {
+      this.refreshPromise = this.tryRefreshToken().finally(() => {
+        this.refreshPromise = null;
+      });
+    }
+    return this.refreshPromise;
+  }
+
   private async request<T>(
     method: string,
     endpoint: string,
     params?: Record<string, string>,
     body?: Record<string, string> | URLSearchParams,
+    hasRetriedAuth = false,
   ): Promise<T> {
     const url = new URL(`${this.config.apiBaseUrl}${endpoint}`);
     if (params) {
@@ -58,8 +68,9 @@ export class InoreaderClient {
       }
     }
 
+    const requestAccessToken = this.accessToken;
     const headers: Record<string, string> = {
-      Authorization: `Bearer ${this.accessToken}`,
+      Authorization: `Bearer ${requestAccessToken}`,
     };
 
     const options: RequestInit = {
@@ -77,11 +88,12 @@ export class InoreaderClient {
 
     const response = await fetch(url.toString(), options);
 
-    if (response.status === 401 && !this.hasRetriedAuth) {
-      this.hasRetriedAuth = true;
-      const refreshed = await this.tryRefreshToken();
+    if (response.status === 401 && !hasRetriedAuth) {
+      // A late response may arrive after another request has refreshed the token.
+      const refreshed =
+        this.accessToken !== requestAccessToken || (await this.refreshToken());
       if (refreshed) {
-        return this.request<T>(method, endpoint, params, body);
+        return this.request<T>(method, endpoint, params, body, true);
       }
       throw new AuthenticationError(
         "Authentication failed. Token may be expired. Use the auth_login tool to re-authenticate.",
@@ -102,9 +114,6 @@ export class InoreaderClient {
         `API request failed: ${response.status} ${response.statusText}`,
       );
     }
-
-    // Reset retry flag on success
-    this.hasRetriedAuth = false;
 
     const contentType = response.headers.get("content-type") ?? "";
 
@@ -236,7 +245,7 @@ export class InoreaderClient {
       await this.request<string>("POST", "/edit-tag", undefined, body);
     } else if (streamId) {
       const body: Record<string, string> = { s: streamId };
-      if (timestamp) {
+      if (timestamp !== undefined) {
         body.ts = String(timestamp);
       }
       await this.request<string>("POST", "/mark-all-as-read", undefined, body);
@@ -312,16 +321,10 @@ export class InoreaderClient {
       body.append("t", options.title);
     }
     if (options.addToFolder) {
-      body.append(
-        "a",
-        `user/-/label/${encodeURIComponent(options.addToFolder)}`,
-      );
+      body.append("a", `user/-/label/${options.addToFolder}`);
     }
     if (options.removeFromFolder) {
-      body.append(
-        "r",
-        `user/-/label/${encodeURIComponent(options.removeFromFolder)}`,
-      );
+      body.append("r", `user/-/label/${options.removeFromFolder}`);
     }
 
     await this.request<string>("POST", "/subscription/edit", undefined, body);

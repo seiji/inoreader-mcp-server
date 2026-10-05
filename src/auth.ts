@@ -36,13 +36,13 @@ function getAuthConfig(): AuthConfig {
   return { appId, appKey };
 }
 
-function buildAuthorizationUrl(appId: string): string {
+function buildAuthorizationUrl(appId: string, state: string): string {
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: REDIRECT_URI,
     response_type: "code",
     scope: "read write",
-    state: crypto.randomUUID(),
+    state,
   });
 
   return `${OAUTH_BASE_URL}/auth?${params.toString()}`;
@@ -114,26 +114,22 @@ export async function openBrowser(url: string): Promise<void> {
   }
 }
 
-function startCallbackServer(): {
+function startCallbackServer(expectedState: string): {
   codePromise: Promise<string>;
   stop: () => void;
 } {
   let stopFn: () => void = () => {};
   const codePromise = new Promise<string>((resolve, reject) => {
-    const timeout = setTimeout(
-      () => {
-        server.stop();
-        reject(new Error("Authentication timed out after 5 minutes"));
-      },
-      5 * 60 * 1000,
-    );
-
     const server = Bun.serve({
       port: REDIRECT_PORT,
       fetch(req) {
         const url = new URL(req.url);
 
         if (url.pathname === "/callback") {
+          if (url.searchParams.get("state") !== expectedState) {
+            return new Response("Invalid OAuth state", { status: 400 });
+          }
+
           const code = url.searchParams.get("code");
           const error = url.searchParams.get("error");
 
@@ -164,13 +160,22 @@ function startCallbackServer(): {
       },
     });
 
+    // Start the timer only after the server has successfully bound its port.
+    const timeout = setTimeout(
+      () => {
+        server.stop();
+        reject(new Error("Authentication timed out after 5 minutes"));
+      },
+      5 * 60 * 1000,
+    );
+
     stopFn = () => {
       clearTimeout(timeout);
       server.stop();
       reject(new Error("Authentication flow was cancelled"));
     };
 
-    console.log(`Callback server started on port ${REDIRECT_PORT}`);
+    console.error(`Callback server started on port ${REDIRECT_PORT}`);
   });
   return { codePromise, stop: () => stopFn() };
 }
@@ -191,7 +196,6 @@ export async function login(): Promise<void> {
 
 export async function logout(): Promise<void> {
   await deleteTokens();
-  console.log("Logged out. Tokens removed from keychain.");
 }
 
 export async function startAuthFlow(): Promise<{
@@ -209,8 +213,9 @@ export async function startAuthFlow(): Promise<{
   }
 
   const config = getAuthConfig();
-  const authUrl = buildAuthorizationUrl(config.appId);
-  const { codePromise, stop } = startCallbackServer();
+  const state = crypto.randomUUID();
+  const authUrl = buildAuthorizationUrl(config.appId, state);
+  const { codePromise, stop } = startCallbackServer(state);
 
   const tokenPromise = (async () => {
     const code = await codePromise;
@@ -222,6 +227,10 @@ export async function startAuthFlow(): Promise<{
       expiresAt,
     });
   })();
+
+  // MCP callers may not call auth_complete before cancellation or timeout.
+  // Observe rejection now while preserving it for callers awaiting tokenPromise.
+  void tokenPromise.catch(() => {});
 
   return { authUrl, tokenPromise, stopServer: stop };
 }

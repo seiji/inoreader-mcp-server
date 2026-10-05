@@ -14,5 +14,5 @@
     "lib": ["ESNext"],
     "types": ["bun-types"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "tests/**/*"]
 }

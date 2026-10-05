@@ -815,6 +815,7 @@ async function runCli() {
         break;
       case "logout":
         await logout();
+        console.log("Logged out. Tokens removed from keychain.");
         break;
       case "status":
         await showStatus();

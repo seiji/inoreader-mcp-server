@@ -29,7 +29,7 @@ No installation required - run directly from GitHub:
 
 ```bash
 bunx github:seiji/inoreader-mcp-server          # latest
-bunx github:seiji/inoreader-mcp-server#v0.1.0   # specific version
+bunx github:seiji/inoreader-mcp-server#v0.4.0   # specific version
 ```
 
 ### Local Development
@@ -61,12 +61,18 @@ export INOREADER_APP_KEY="your-app-key"
 
 ```bash
 # This opens your browser for OAuth authentication
-bun run src/index.ts auth login
+bunx github:seiji/inoreader-mcp-server auth login
 ```
+
+Alternatively, authenticate from your MCP client: call the `auth_login` tool,
+open the returned URL in a browser, then call `auth_complete`.
 
 Tokens are securely stored in your system keychain:
 - **macOS**: Keychain Access
 - **Linux**: GNOME Keyring / KDE Wallet (via libsecret)
+
+To bypass the keychain, set `INOREADER_ACCESS_TOKEN`. It takes priority over
+tokens stored in the keychain.
 
 ### Auth Commands
 
@@ -93,9 +99,12 @@ bunx github:seiji/inoreader-mcp-server
 bun run start
 ```
 
-### Claude Desktop Configuration
+### MCP Client Configuration
 
-Add to your Claude Desktop config (`claude_desktop_config.json`):
+Install the server with your MCP client. `INOREADER_APP_ID` and `INOREADER_APP_KEY`
+are required for login and token refresh.
+
+**Standard config** works in most of the tools:
 
 ```json
 {
@@ -112,12 +121,75 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 }
 ```
 
-**Note**: Before running the auth command, ensure `INOREADER_APP_ID` and `INOREADER_APP_KEY` are set in your shell environment (see **2. Set Environment Variables** above). After configuring, run `bunx github:seiji/inoreader-mcp-server auth login` once to authenticate. Tokens are stored in keychain and automatically refreshed.
+<details>
+<summary>Claude Code</summary>
+
+Use the Claude Code CLI to add the Inoreader MCP server:
+
+```bash
+claude mcp add inoreader --scope user \
+  -e INOREADER_APP_ID=your-app-id \
+  -e INOREADER_APP_KEY=your-app-key \
+  -- bunx github:seiji/inoreader-mcp-server
+```
+
+</details>
+
+<details>
+<summary>Claude Desktop</summary>
+
+Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user), use the standard config above.
+
+</details>
+
+<details>
+<summary>Codex</summary>
+
+Use the Codex CLI to add the Inoreader MCP server:
+
+```bash
+codex mcp add inoreader \
+  --env INOREADER_APP_ID=your-app-id \
+  --env INOREADER_APP_KEY=your-app-key \
+  -- bunx github:seiji/inoreader-mcp-server
+```
+
+Alternatively, create or edit the configuration file `~/.codex/config.toml` and add:
+
+```toml
+[mcp_servers.inoreader]
+command = "bunx"
+args = ["github:seiji/inoreader-mcp-server"]
+env = { INOREADER_APP_ID = "your-app-id", INOREADER_APP_KEY = "your-app-key" }
+```
+
+</details>
+
+<details>
+<summary>VS Code</summary>
+
+Follow the MCP install [guide](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server), use the standard config above. You can also install the Inoreader MCP server using the VS Code CLI:
+
+```bash
+code --add-mcp '{"name":"inoreader","command":"bunx","args":["github:seiji/inoreader-mcp-server"],"env":{"INOREADER_APP_ID":"your-app-id","INOREADER_APP_KEY":"your-app-key"}}'
+```
+
+</details>
+
+Do not commit project-scoped config files that contain your App Key.
+
+After configuring, authenticate once with `bunx github:seiji/inoreader-mcp-server auth login`
+(with the environment variables set in your shell) or with the `auth_login` / `auth_complete`
+tools. Tokens are stored in keychain and automatically refreshed.
 
 ## Available Tools
 
 | Tool | Description |
 |------|-------------|
+| `auth_login` | Start OAuth flow and return an authorization URL |
+| `auth_complete` | Finish the OAuth flow started by `auth_login` and save tokens |
+| `auth_status` | Show current authentication status |
+| `auth_logout` | Remove saved tokens from keychain |
 | `get_user_info` | Get authenticated user information |
 | `get_unread_counts` | Get unread counts for all feeds |
 | `get_subscriptions` | List all RSS subscriptions |
@@ -126,6 +198,9 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 | `get_starred_articles` | Get starred/saved articles |
 | `add_subscription` | Subscribe to a new RSS feed |
 | `remove_subscription` | Unsubscribe from a feed |
+| `add_subscription_to_folder` | Add a subscription to a folder |
+| `remove_subscription_from_folder` | Remove a subscription from a folder |
+| `rename_subscription` | Rename a subscription (change its title) |
 | `mark_as_read` | Mark articles as read |
 | `mark_as_unread` | Mark articles as unread |
 | `star_article` | Star/save an article |
@@ -135,7 +210,7 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 
 ## Example Interactions
 
-Once configured with Claude, you can:
+Once configured in your MCP client, you can ask:
 
 - "Show me my unread articles"
 - "What are my RSS subscriptions?"
@@ -146,54 +221,15 @@ Once configured with Claude, you can:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development commands, PR title
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and testing commands, PR title
 conventions, the squash merge policy, versioning rules, and release procedures.
 
-## Repository Administration
+The draft [MCP specification](docs/specification.md) defines the public contract
+and pending design decisions. See [specification-to-test coverage](docs/test_coverage.md)
+for tested scenarios and remaining gaps.
 
-### Maintainer setup
-
-Create a private GitHub App with **Contents**, **Issues**, and **Pull requests**
-repository permissions set to **Read and write**. Disable webhooks; no server or
-OAuth callback is required. Install the App on this account and grant access
-only to this repository.
-
-Under **Settings → Secrets and variables → Actions**, add:
-
-- Repository variable `RELEASE_APP_CLIENT_ID`: the App's Client ID.
-- Repository secret `RELEASE_APP_PRIVATE_KEY`: the complete PEM private key,
-  including its BEGIN/END lines, generated in the App's settings.
-
-The workflow generates an installation access token scoped to this repository
-for each run. The token expires after one hour and is revoked when the job ends.
-No personal access token is required. Keep the private key out of the repository
-and rotate it periodically.
-
-Using the App token allows release PRs to trigger the existing `pull_request`
-CI workflow. PRs and tags created with the default `GITHUB_TOKEN` do not trigger
-other Actions workflows.
-
-### Required PR title check
-
-PR title conventions and the merge policy are documented in
-[CONTRIBUTING.md](CONTRIBUTING.md#pull-requests).
-
-The **Validate PR title** check runs when a PR is opened, reopened, edited,
-updated with commits, or marked ready for review. It uses `pull_request_target`
-to support fork PRs, reads only PR metadata, and never checks out or executes PR
-code. The workflow must be merged into the default branch before it can run.
-
-To enforce this check before merging:
-
-1. Under **Settings → General → Pull Requests**, allow only squash merging and
-   set the default squash commit message to **Pull request title**.
-2. Under **Settings → Rules → Rulesets**, create or edit an active branch ruleset
-   targeting `main`.
-3. Enable **Require a pull request before merging** and **Require status checks
-   to pass**. Add **Validate PR title** as a required check, selecting GitHub
-   Actions as its expected source. If the check is not listed, run it on a PR
-   after the workflow has been merged, then return to the settings.
-4. Limit bypass permissions so that the rule applies to everyone who merges PRs.
+Maintainers: see [Repository Administration](docs/repository_administration.md)
+for the release GitHub App setup and required PR title check settings.
 
 ## Troubleshooting
 

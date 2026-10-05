@@ -6,6 +6,9 @@
 # Install dependencies
 bun install
 
+# Run tests
+bun run test
+
 # Type checking
 bun run typecheck
 
@@ -29,7 +32,19 @@ bun run start auth status  # Show authentication status
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before preparing changes or PRs. It is
   the source of truth for contribution, versioning, and release policies.
 - Keep changes focused on one concern and run the relevant tests, type checker,
-  and linter. See `tests/README.md` for the current test-first status.
+  and linter. See [tests/README.md](tests/README.md) for coverage, mock isolation,
+  and the current test-first status.
+- Read [docs/specification.md](docs/specification.md) for public contracts and
+  pending decisions. Maintain [docs/test_coverage.md](docs/test_coverage.md) and
+  reference specification IDs in public contract tests; do not infer full coverage
+  from line percentages or approve unresolved policies implicitly.
+- For bug fixes, add a failing regression test before changing the implementation.
+  Do not skip tests or weaken expectations to accommodate bugs. Distinguish known
+  Red tests from new failures when reporting validation results.
+- Keep default tests offline and isolated from real credential stores; restore
+  global mocks and environment variables, and clean up promises and timers.
+- CI and release workflows run `bun run test`, type checking, and linting. Do not
+  bypass failing tests with `continue-on-error` or equivalent settings.
 - Use Conventional Commit PR titles: `<type>[optional scope][!]: <description>`.
   Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
   `build`, `ci`, `chore`, and `revert`. For example, `fix(auth): handle expired

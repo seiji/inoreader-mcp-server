@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/seiji/inoreader-mcp-server/compare/v0.4.0...v0.4.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **mcp:** define contracts and fix auth and API regressions ([#11](https://github.com/seiji/inoreader-mcp-server/issues/11)) ([6b53047](https://github.com/seiji/inoreader-mcp-server/commit/6b53047fdfe5a14a5e4cace549651becc00c319a))
+
 ## [0.4.0](https://github.com/seiji/inoreader-mcp-server/compare/v0.3.0...v0.4.0) (2026-10-04)
 
 

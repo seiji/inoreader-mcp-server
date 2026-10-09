@@ -1,4 +1,6 @@
 import { $ } from "bun";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 const SERVICE_NAME = "inoreader-mcp";
 
@@ -14,6 +16,62 @@ async function isMacOS(): Promise<boolean> {
 
 async function isLinux(): Promise<boolean> {
   return process.platform === "linux";
+}
+
+async function isWindows(): Promise<boolean> {
+  return process.platform === "win32";
+}
+
+function windowsTokenFile(account: string): string {
+  // Escape single quotes for safe embedding into a PowerShell single-quoted string.
+  return join(homedir(), "AppData", "Local", SERVICE_NAME, `${account}.dat`).replace(
+    /'/g,
+    "''",
+  );
+}
+
+async function windowsSet(account: string, password: string): Promise<void> {
+  const file = windowsTokenFile(account);
+  const script = `
+Add-Type -AssemblyName System.Security
+$dir = Split-Path -Parent '${file}'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($env:INOREADER_MCP_SECRET)
+$protected = [System.Security.Cryptography.ProtectedData]::Protect($bytes, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+[System.IO.File]::WriteAllBytes('${file}', $protected)
+`;
+  await $`powershell -NoProfile -NonInteractive -Command ${script}`
+    .env({ ...process.env, INOREADER_MCP_SECRET: password })
+    .quiet();
+}
+
+async function windowsGet(account: string): Promise<string | null> {
+  const file = windowsTokenFile(account);
+  if (!(await Bun.file(file).exists())) {
+    return null;
+  }
+
+  const script = `
+Add-Type -AssemblyName System.Security
+$protected = [System.IO.File]::ReadAllBytes('${file}')
+$bytes = [System.Security.Cryptography.ProtectedData]::Unprotect($protected, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser)
+[System.Console]::Out.Write([System.Text.Encoding]::UTF8.GetString($bytes))
+`;
+  try {
+    const result = await $`powershell -NoProfile -NonInteractive -Command ${script}`.quiet();
+    return result.text().trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+async function windowsDelete(account: string): Promise<void> {
+  const file = windowsTokenFile(account);
+  try {
+    await Bun.file(file).delete();
+  } catch {
+    // Ignore - entry might not exist
+  }
 }
 
 async function macOSSet(account: string, password: string): Promise<void> {
@@ -74,6 +132,8 @@ export async function saveTokens(tokens: TokenData): Promise<void> {
     await macOSSet("tokens", data);
   } else if (await isLinux()) {
     await linuxSet("tokens", data);
+  } else if (await isWindows()) {
+    await windowsSet("tokens", data);
   } else {
     throw new Error(
       `Unsupported platform: ${process.platform}. Use environment variables instead.`,
@@ -88,6 +148,8 @@ export async function loadTokens(): Promise<TokenData | null> {
     data = await macOSGet("tokens");
   } else if (await isLinux()) {
     data = await linuxGet("tokens");
+  } else if (await isWindows()) {
+    data = await windowsGet("tokens");
   }
 
   if (!data) {
@@ -106,6 +168,8 @@ export async function deleteTokens(): Promise<void> {
     await macOSDelete("tokens");
   } else if (await isLinux()) {
     await linuxDelete("tokens");
+  } else if (await isWindows()) {
+    await windowsDelete("tokens");
   }
 }
 
@@ -122,6 +186,15 @@ export async function isKeychainAvailable(): Promise<boolean> {
   if (await isLinux()) {
     try {
       await $`which secret-tool`.quiet();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  if (await isWindows()) {
+    try {
+      await $`which powershell`.quiet();
       return true;
     } catch {
       return false;
